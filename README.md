@@ -1,356 +1,192 @@
-# DevBase API English Version (french version line174)
+# 📘 DevBase API
 
-DevBase API is a RESTful backend application designed to manage users, projects, and tasks with strict ownership-based access control.  
-The project focuses on clean backend architecture, authentication, authorization, validation, and security best practices.
+DevBase API est une **API REST backend** conçue pour gérer des **projets** et des **tâches** avec une **authentification sécurisée** basée sur JWT.
 
-This API is intended as a **portfolio-grade backend project** demonstrating real-world patterns used in professional environments.
+Ce projet a été réalisé comme **projet portfolio backend**, avec un fort accent sur :
 
----
-
-## Features
-
-- User registration and authentication
-- JWT-based authentication (Access Token + Refresh Token)
-- Projects CRUD (Create, Read, Update, Delete)
-- Tasks CRUD linked to both users and projects
-- Ownership enforcement (users can only access their own resources)
-- Request validation using Zod
-- Centralized error handling
-- Fully tested with Postman
-- Interactive API documentation with Swagger (OpenAPI)
+- la sécurité
+- la structure du code
+- la documentation
+- la testabilité
 
 ---
 
-## Tech Stack
+## 🚀 Stack technique
 
-- **Node.js**
+- **Node.js** + **TypeScript**
 - **Express**
-- **TypeScript**
 - **PostgreSQL**
 - **Prisma ORM**
-- **JWT (jsonwebtoken)**
-- **Zod** (request validation)
-- **Swagger / OpenAPI**
-- **Postman** (API testing)
+- **JWT (access + refresh tokens)**
+- **Swagger / OpenAPI** (documentation officielle)
+- **Zod** (validation)
+- **Render** (déploiement)
 
 ---
 
-## Authentication & Security
+## ✨ Fonctionnalités
 
-- All protected routes require a valid **JWT access token**
-- Tokens are validated using middleware
-- Refresh tokens are used to renew access tokens
-- Ownership is enforced at the API level:
-  - Users cannot access or modify resources they do not own
-  - Unauthorized resource access returns **404** to prevent resource enumeration
-- Invalid or missing tokens return **401 Unauthorized**
+- 🔐 Authentification sécurisée
+  - Register / Login
+  - JWT Bearer (access token)
+  - Refresh token en cookie HTTP-only
 
----
+- 📁 Gestion des **Projects**
+  - CRUD complet
+  - Accès isolé par utilisateur (ownership)
+  - Pagination, recherche, tri
 
-## API Structure
+- ✅ Gestion des **Tasks**
+  - CRUD complet
+  - Liées à un project
+  - Filtres (par projet, statut, pagination)
 
-### Auth
-
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `POST /api/auth/refresh`
-
-### Projects
-
-- `POST /api/projects`
-- `GET /api/projects`
-- `GET /api/projects/:id`
-- `PATCH /api/projects/:id`
-- `DELETE /api/projects/:id`
-
-### Tasks
-
-- `POST /api/tasks`
-- `GET /api/tasks`
-- `GET /api/tasks/:id`
-- `PATCH /api/tasks/:id`
-- `DELETE /api/tasks/:id`
+- 🛡️ Sécurité
+  - Routes protégées
+  - Rate limiting
+  - Headers de sécurité (Helmet)
 
 ---
 
-## API Testing (Postman)
+## 🌍 API en production
 
-A complete Postman collection is provided to validate:
+- **Base URL (prod)**
 
-- Authentication flow
-- Projects CRUD
-- Tasks CRUD
-- Ownership enforcement
-- Security rules
+  ```
+  https://devbase-api-egxh.onrender.com
+  ```
 
-### Tested scenarios include:
-
-- Access without token (blocked)
-- User accessing their own resources (allowed)
-- User accessing another user's resources (blocked)
-- Task isolation per user
-- Security edge cases
-
-Tokens and resource IDs are stored automatically using Postman environment variables.  
-No secrets are hard-coded in the collection.
+- **Swagger (documentation officielle)**
+  👉 [https://devbase-api-egxh.onrender.com/docs](https://devbase-api-egxh.onrender.com/docs)
 
 ---
 
-## API Documentation (Swagger)
+## 📖 Documentation API (Swagger)
 
-Interactive API documentation is available at:
+Swagger est la **source de vérité** de l’API :
 
-```
+- toutes les routes sont documentées
+- chaque endpoint est testable
+- exemples de payloads inclus
+- authentification JWT intégrée
 
-[http://localhost:4000/docs](http://localhost:4000/docs)
-
-```
-
-Swagger provides:
-
-- Endpoint descriptions
-- Request/response schemas
-- Example payloads
-- A visual overview of the API contract
+👉 **Aucun Postman requis pour tester l’API**
 
 ---
 
-## Running the Project Locally
+## 🧪 How to test this API (via Swagger)
 
-### 1. Install dependencies
+### 1️⃣ Ouvrir Swagger
 
-```bash
-npm install
-```
-
-### 2. Configure environment variables
-
-Create a `.env` file and define:
-
-- Database connection
-- JWT secrets
-- Token expiration values
-
-### 3. Run database migrations
-
-```bash
-npx prisma migrate dev
-```
-
-### 4. Start the development server
-
-```bash
-npm run dev
-```
-
-The API will be available at:
-
-```
-http://localhost:4000
-```
+👉 [https://devbase-api-egxh.onrender.com/docs](https://devbase-api-egxh.onrender.com/docs)
 
 ---
 
-## Project Status
+### 2️⃣ Créer un compte (Register)
 
-The core backend features are **complete and stable**.
+- Aller dans **Auth → POST /api/auth/register**
+- Cliquer sur **Try it out**
+- Exemple de body :
 
-This project is suitable for:
-
-- Portfolio presentation
-- Junior backend or full-stack developer roles
-- Demonstrating authentication, security, and API design fundamentals
-
-Future improvements (optional):
-
-- Automated tests (Jest)
-- CI/CD pipeline
-- Role-based access control
-- Frontend integration
-
----
-
-## Author
-
-Built as a backend portfolio project to demonstrate real-world API development practices.
-
-# DevBase API Version Francaise
-
-DevBase API est une application backend REST conçue pour gérer des utilisateurs, des projets et des tâches avec un contrôle d’accès strict basé sur la notion de propriétaire (ownership).  
-Le projet met l’accent sur une architecture backend propre, l’authentification, l’autorisation, la validation des données et les bonnes pratiques de sécurité.
-
-Cette API a été réalisée comme **projet de portfolio** afin de démontrer des patterns utilisés en environnement professionnel.
-
----
-
-## Fonctionnalités
-
-- Inscription et authentification des utilisateurs
-- Authentification JWT (Access Token + Refresh Token)
-- CRUD complet des projets (Create, Read, Update, Delete)
-- CRUD complet des tâches liées aux utilisateurs et aux projets
-- Contrôle d’accès par ownership (un utilisateur ne peut accéder qu’à ses ressources)
-- Validation des requêtes avec Zod
-- Gestion centralisée des erreurs
-- Tests complets via Postman
-- Documentation interactive de l’API avec Swagger (OpenAPI)
-
----
-
-## 🛠 Stack Technique
-
-- **Node.js**
-- **Express**
-- **TypeScript**
-- **PostgreSQL**
-- **Prisma ORM**
-- **JWT (jsonwebtoken)**
-- **Zod** (validation des requêtes)
-- **Swagger / OpenAPI**
-- **Postman** (tests de l’API)
-
----
-
-## Authentification & Sécurité
-
-- Toutes les routes protégées nécessitent un **JWT access token valide**
-- Les tokens sont validés via un middleware
-- Les refresh tokens permettent de renouveler les access tokens
-- Le contrôle d’accès est appliqué au niveau de l’API :
-  - Un utilisateur ne peut ni lire ni modifier les ressources d’un autre utilisateur
-  - L’accès non autorisé à une ressource retourne **404** afin d’éviter l’énumération des ressources
-- Un token manquant ou invalide retourne **401 Unauthorized**
-
----
-
-## Structure de l’API
-
-### Auth
-
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `POST /api/auth/refresh`
-
-### Projects
-
-- `POST /api/projects`
-- `GET /api/projects`
-- `GET /api/projects/:id`
-- `PATCH /api/projects/:id`
-- `DELETE /api/projects/:id`
-
-### Tasks
-
-- `POST /api/tasks`
-- `GET /api/tasks`
-- `GET /api/tasks/:id`
-- `PATCH /api/tasks/:id`
-- `DELETE /api/tasks/:id`
-
----
-
-## Tests de l’API (Postman)
-
-Une collection Postman complète est fournie afin de valider :
-
-- Le flux d’authentification
-- Le CRUD des projets
-- Le CRUD des tâches
-- Le contrôle d’accès par ownership
-- Les règles de sécurité
-
-### Scénarios testés :
-
-- Accès sans token (bloqué)
-- Accès aux ressources propres (autorisé)
-- Accès aux ressources d’un autre utilisateur (bloqué)
-- Isolation des tâches par utilisateur
-- Cas limites liés à la sécurité
-
-Les tokens et identifiants sont stockés automatiquement via les variables d’environnement Postman.  
-Aucun secret n’est codé en dur dans la collection.
-
----
-
-## Documentation de l’API (Swagger)
-
-La documentation interactive de l’API est accessible à l’adresse suivante :
-
+```json
+{
+  "email": "user@example.com",
+  "password": "StrongPassword123!",
+  "name": "John Doe"
+}
 ```
 
-[http://localhost:4000/docs](http://localhost:4000/docs)
-
-```
-
-Swagger permet de :
-
-- Visualiser les routes disponibles
-- Comprendre les schémas de requêtes et de réponses
-- Tester les endpoints directement depuis le navigateur
-- Disposer d’un contrat clair de l’API
+- Cliquer sur **Execute**
+- Copier le `accessToken` retourné
 
 ---
 
-## 🚀 Lancer le projet en local
+### 3️⃣ S’authentifier dans Swagger
 
-### 1. Installer les dépendances
-
-```bash
-npm install
-```
-
-### 2. Configurer les variables d’environnement
-
-Créer un fichier `.env` et définir :
-
-- La connexion à la base de données
-- Les secrets JWT
-- Les durées d’expiration des tokens
-
-### 3. Lancer les migrations
-
-```bash
-npx prisma migrate dev
-```
-
-### 4. Démarrer le serveur de développement
-
-```bash
-npm run dev
-```
-
-L’API sera disponible à l’adresse :
+- Cliquer sur **Authorize** (en haut à droite)
+- Coller le token sous la forme :
 
 ```
-http://localhost:4000
+Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
+
+- Cliquer sur **Authorize**
+
+✅ Toutes les routes protégées sont maintenant accessibles
 
 ---
 
-## État du projet
+### 4️⃣ Tester les routes protégées
 
-Les fonctionnalités principales du backend sont **complètes et stables**.
+Tu peux maintenant tester :
 
-Ce projet est adapté pour :
+#### 📁 Projects
 
-- Un portfolio de développeur junior backend / full-stack
-- La démonstration de bonnes pratiques API
-- Illustrer l’authentification, la sécurité et le contrôle d’accès
+- `POST /api/projects` → créer un projet
+- `GET /api/projects` → lister les projets
+- `PATCH /api/projects/{id}` → modifier
+- `DELETE /api/projects/{id}` → supprimer
 
-Améliorations possibles (optionnelles) :
+#### ✅ Tasks
 
-- Tests automatisés (Jest)
-- Mise en place d’un CI/CD
-- Gestion des rôles (admin, etc.)
-- Intégration d’un frontend
+- `POST /api/tasks` → créer une tâche
+- `GET /api/tasks` → lister les tâches
+- `PATCH /api/tasks/{id}` → mettre à jour
+- `DELETE /api/tasks/{id}` → supprimer
 
 ---
 
-## Auteur
+## 🔐 Authentification & Sécurité
 
-Projet backend réalisé dans le cadre d’un portfolio afin de démontrer des pratiques professionnelles de développement d’API.
+- **Access token** : JWT (Bearer) → envoyé via header `Authorization`
+- **Refresh token** :
+  - stocké en cookie HTTP-only
+  - non accessible en JavaScript
+
+- Isolation stricte :
+  - un utilisateur ne peut accéder **qu’à ses propres données**
+
+---
+
+## 🧠 Architecture (simplifiée)
 
 ```
-
-
+src/
+ ├─ modules/
+ │   ├─ auth/
+ │   ├─ projects/
+ │   └─ tasks/
+ ├─ middleware/
+ ├─ docs/        # Swagger / OpenAPI
+ ├─ config/
+ └─ app.ts
 ```
+
+- Controllers → couche HTTP
+- Services → logique métier
+- Prisma → accès base de données
+- Zod → validation des entrées
+
+---
+
+## 🎯 Objectif du projet
+
+Ce projet a été conçu pour démontrer :
+
+- la capacité à concevoir une API REST propre
+- la mise en place d’une authentification sécurisée
+- une documentation claire et exploitable
+- des bonnes pratiques backend professionnelles
+
+---
+
+## 📌 Notes
+
+- Swagger est volontairement **complet et autonome**
+- Postman est utilisé uniquement pour les tests internes
+- Le projet est prêt pour être :
+  - étendu
+  - connecté à un frontend
+  - présenté en entretien technique
+
+---
