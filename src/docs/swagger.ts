@@ -49,7 +49,6 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
 
   /**
    * 🛡️ Sécurité appliquée globalement
-   * (sera affinée route par route plus tard)
    */
   security: [
     {
@@ -215,6 +214,11 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
       },
     },
 
+    /**
+     * ------------------------------------------------------------
+     * Projects
+     * ------------------------------------------------------------
+     */
     "/api/projects": {
       post: {
         tags: ["Projects"],
@@ -228,14 +232,13 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
               schema: {
                 type: "object",
                 required: ["name"],
+                additionalProperties: false,
                 properties: {
                   name: {
                     type: "string",
-                    example: "Portfolio Backend API",
-                  },
-                  description: {
-                    type: "string",
-                    example: "Projet backend Node.js avec auth JWT",
+                    minLength: 2,
+                    maxLength: 80,
+                    example: "Project Postman 2",
                   },
                 },
               },
@@ -248,10 +251,11 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
             content: {
               "application/json": {
                 example: {
-                  id: "uuid",
-                  name: "Portfolio Backend API",
-                  description: "Projet backend Node.js avec auth JWT",
-                  createdAt: "2025-01-01T12:00:00.000Z",
+                  id: "ce73e824-5d16-4b4d-91eb-ee1cfd38e0a7",
+                  name: "Project Postman 2",
+                  ownerId: "04936224-25c1-420d-b9d3-52a031cbc69f",
+                  createdAt: "2026-02-10T06:26:06.592Z",
+                  updatedAt: "2026-02-10T06:26:06.592Z",
                 },
               },
             },
@@ -270,22 +274,36 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
           {
             name: "page",
             in: "query",
-            schema: { type: "integer", example: 1 },
+            required: false,
+            schema: { type: "integer", minimum: 1, default: 1 },
           },
           {
-            name: "limit",
+            name: "pageSize",
             in: "query",
-            schema: { type: "integer", example: 10 },
+            required: false,
+            schema: { type: "integer", minimum: 1, maximum: 50, default: 10 },
           },
           {
             name: "search",
             in: "query",
-            schema: { type: "string", example: "portfolio" },
+            required: false,
+            schema: { type: "string", minLength: 1, maxLength: 80 },
           },
           {
-            name: "sort",
+            name: "sortBy",
             in: "query",
-            schema: { type: "string", example: "createdAt:desc" },
+            required: false,
+            schema: {
+              type: "string",
+              enum: ["createdAt", "updatedAt", "name"],
+              default: "createdAt",
+            },
+          },
+          {
+            name: "sortOrder",
+            in: "query",
+            required: false,
+            schema: { type: "string", enum: ["asc", "desc"], default: "desc" },
           },
         ],
         responses: {
@@ -294,18 +312,26 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
             content: {
               "application/json": {
                 example: {
-                  data: [
+                  items: [
                     {
-                      id: "uuid",
-                      name: "Portfolio Backend API",
-                      description: "Projet backend Node.js",
+                      id: "ce73e824-5d16-4b4d-91eb-ee1cfd38e0a7",
+                      name: "Project Postman 2",
+                      ownerId: "04936224-25c1-420d-b9d3-52a031cbc69f",
+                      createdAt: "2026-02-10T06:26:06.592Z",
+                      updatedAt: "2026-02-10T06:26:06.592Z",
+                    },
+                    {
+                      id: "c917b5aa-2b51-4474-bd5e-8a89c4a5757d",
+                      name: "Project Postman 1",
+                      ownerId: "04936224-25c1-420d-b9d3-52a031cbc69f",
+                      createdAt: "2026-02-07T08:03:52.158Z",
+                      updatedAt: "2026-02-07T08:03:52.158Z",
                     },
                   ],
-                  meta: {
-                    page: 1,
-                    limit: 10,
-                    total: 1,
-                  },
+                  page: 1,
+                  pageSize: 10,
+                  total: 4,
+                  totalPages: 1,
                 },
               },
             },
@@ -326,7 +352,7 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
             name: "id",
             in: "path",
             required: true,
-            schema: { type: "string", example: "uuid" },
+            schema: { type: "string", format: "uuid" },
           },
         ],
         responses: {
@@ -335,13 +361,16 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
             content: {
               "application/json": {
                 example: {
-                  id: "uuid",
-                  name: "Portfolio Backend API",
-                  description: "Projet backend Node.js",
+                  id: "ce73e824-5d16-4b4d-91eb-ee1cfd38e0a7",
+                  name: "Project Postman 2",
+                  ownerId: "04936224-25c1-420d-b9d3-52a031cbc69f",
+                  createdAt: "2026-02-10T06:26:06.592Z",
+                  updatedAt: "2026-02-10T06:26:06.592Z",
                 },
               },
             },
           },
+          "401": { description: "Unauthorized" },
           "404": { description: "Project not found" },
         },
       },
@@ -349,14 +378,15 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
       patch: {
         tags: ["Projects"],
         summary: "Update project",
-        description: "Met à jour un projet existant.",
+        description:
+          "Met à jour un projet existant (au moins un champ requis).",
         security: [{ bearerAuth: [] }],
         parameters: [
           {
             name: "id",
             in: "path",
             required: true,
-            schema: { type: "string", example: "uuid" },
+            schema: { type: "string", format: "uuid" },
           },
         ],
         requestBody: {
@@ -365,14 +395,13 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
             "application/json": {
               schema: {
                 type: "object",
+                additionalProperties: false,
                 properties: {
                   name: {
                     type: "string",
-                    example: "Updated project name",
-                  },
-                  description: {
-                    type: "string",
-                    example: "Nouvelle description",
+                    minLength: 2,
+                    maxLength: 80,
+                    example: "Project Updated",
                   },
                 },
               },
@@ -381,6 +410,8 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
         },
         responses: {
           "200": { description: "Project updated" },
+          "400": { description: "Validation error" },
+          "401": { description: "Unauthorized" },
           "404": { description: "Project not found" },
         },
       },
@@ -395,22 +426,27 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
             name: "id",
             in: "path",
             required: true,
-            schema: { type: "string", example: "uuid" },
+            schema: { type: "string", format: "uuid" },
           },
         ],
         responses: {
           "200": { description: "Project deleted" },
+          "401": { description: "Unauthorized" },
           "404": { description: "Project not found" },
         },
       },
     },
 
+    /**
+     * ------------------------------------------------------------
+     * Tasks
+     * ------------------------------------------------------------
+     */
     "/api/tasks": {
       post: {
         tags: ["Tasks"],
         summary: "Create a task",
-        description:
-          "Crée une nouvelle tâche liée à un projet appartenant à l’utilisateur.",
+        description: "Crée une nouvelle tâche liée à un projet.",
         security: [{ bearerAuth: [] }],
         requestBody: {
           required: true,
@@ -418,15 +454,24 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
             "application/json": {
               schema: {
                 type: "object",
-                required: ["title", "projectId"],
+                required: ["projectId", "title"],
+                additionalProperties: false,
                 properties: {
-                  title: {
-                    type: "string",
-                    example: "Implement JWT middleware",
-                  },
                   projectId: {
                     type: "string",
-                    example: "project-uuid",
+                    format: "uuid",
+                    example: "c917b5aa-2b51-4474-bd5e-8a89c4a5757d",
+                  },
+                  title: {
+                    type: "string",
+                    minLength: 1,
+                    maxLength: 120,
+                    example: "Task Postman 1",
+                  },
+                  status: {
+                    type: "string",
+                    enum: ["TODO", "DOING", "DONE"],
+                    example: "TODO",
                   },
                 },
               },
@@ -439,11 +484,13 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
             content: {
               "application/json": {
                 example: {
-                  id: "task-uuid",
-                  title: "Implement JWT middleware",
-                  completed: false,
-                  projectId: "project-uuid",
-                  createdAt: "2025-01-01T12:00:00.000Z",
+                  id: "17a9be9f-e186-4546-8a09-96282077beb4",
+                  title: "Task Postman 1",
+                  status: "TODO",
+                  projectId: "c917b5aa-2b51-4474-bd5e-8a89c4a5757d",
+                  userId: "04936224-25c1-420d-b9d3-52a031cbc69f",
+                  createdAt: "2026-02-07T08:26:59.204Z",
+                  updatedAt: "2026-02-11T06:42:04.637Z",
                 },
               },
             },
@@ -455,29 +502,20 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
       get: {
         tags: ["Tasks"],
         summary: "List tasks",
-        description:
-          "Retourne la liste des tâches de l’utilisateur (pagination et filtres).",
+        description: "Retourne la liste des tâches (filtres optionnels).",
         security: [{ bearerAuth: [] }],
         parameters: [
           {
             name: "projectId",
             in: "query",
-            schema: { type: "string", example: "project-uuid" },
+            required: false,
+            schema: { type: "string", format: "uuid" },
           },
           {
-            name: "completed",
+            name: "status",
             in: "query",
-            schema: { type: "boolean", example: false },
-          },
-          {
-            name: "page",
-            in: "query",
-            schema: { type: "integer", example: 1 },
-          },
-          {
-            name: "limit",
-            in: "query",
-            schema: { type: "integer", example: 10 },
+            required: false,
+            schema: { type: "string", enum: ["TODO", "DOING", "DONE"] },
           },
         ],
         responses: {
@@ -485,21 +523,17 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
             description: "Tasks list",
             content: {
               "application/json": {
-                example: {
-                  data: [
-                    {
-                      id: "task-uuid",
-                      title: "Implement JWT middleware",
-                      completed: false,
-                      projectId: "project-uuid",
-                    },
-                  ],
-                  meta: {
-                    page: 1,
-                    limit: 10,
-                    total: 1,
+                example: [
+                  {
+                    id: "17a9be9f-e186-4546-8a09-96282077beb4",
+                    title: "Task Postman 1",
+                    status: "TODO",
+                    projectId: "c917b5aa-2b51-4474-bd5e-8a89c4a5757d",
+                    userId: "04936224-25c1-420d-b9d3-52a031cbc69f",
+                    createdAt: "2026-02-07T08:26:59.204Z",
+                    updatedAt: "2026-02-11T06:42:04.637Z",
                   },
-                },
+                ],
               },
             },
           },
@@ -519,23 +553,12 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
             name: "id",
             in: "path",
             required: true,
-            schema: { type: "string", example: "task-uuid" },
+            schema: { type: "string", format: "uuid" },
           },
         ],
         responses: {
-          "200": {
-            description: "Task found",
-            content: {
-              "application/json": {
-                example: {
-                  id: "task-uuid",
-                  title: "Implement JWT middleware",
-                  completed: false,
-                  projectId: "project-uuid",
-                },
-              },
-            },
-          },
+          "200": { description: "Task found" },
+          "401": { description: "Unauthorized" },
           "404": { description: "Task not found" },
         },
       },
@@ -543,14 +566,14 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
       patch: {
         tags: ["Tasks"],
         summary: "Update task",
-        description: "Met à jour une tâche existante.",
+        description: "Met à jour une tâche (au moins un champ requis).",
         security: [{ bearerAuth: [] }],
         parameters: [
           {
             name: "id",
             in: "path",
             required: true,
-            schema: { type: "string", example: "task-uuid" },
+            schema: { type: "string", format: "uuid" },
           },
         ],
         requestBody: {
@@ -559,14 +582,18 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
             "application/json": {
               schema: {
                 type: "object",
+                additionalProperties: false,
                 properties: {
                   title: {
                     type: "string",
-                    example: "Finalize Swagger documentation",
+                    minLength: 1,
+                    maxLength: 120,
+                    example: "Updated task title",
                   },
-                  completed: {
-                    type: "boolean",
-                    example: true,
+                  status: {
+                    type: "string",
+                    enum: ["TODO", "DOING", "DONE"],
+                    example: "DOING",
                   },
                 },
               },
@@ -575,6 +602,8 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
         },
         responses: {
           "200": { description: "Task updated" },
+          "400": { description: "Validation error" },
+          "401": { description: "Unauthorized" },
           "404": { description: "Task not found" },
         },
       },
@@ -589,11 +618,12 @@ Utilisez \`/api/auth/login\` pour obtenir un token, puis cliquez sur **Authorize
             name: "id",
             in: "path",
             required: true,
-            schema: { type: "string", example: "task-uuid" },
+            schema: { type: "string", format: "uuid" },
           },
         ],
         responses: {
           "200": { description: "Task deleted" },
+          "401": { description: "Unauthorized" },
           "404": { description: "Task not found" },
         },
       },
