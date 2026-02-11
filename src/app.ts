@@ -90,6 +90,24 @@ export function createApp() {
   });
 
   /**
+   * Root route (landing)
+   * ----------------------------------------------------------------
+   * Page d’accueil minimale pour indiquer que l’API est en ligne
+   * et rediriger vers la documentation Swagger.
+   */
+  app.get("/", (_req, res) => {
+    res.status(200).json({
+      name: "DevBase API",
+      status: "running",
+      message: "Welcome to DevBase API",
+      documentation: {
+        swagger: "/docs",
+        fullUrl: "https://devbase-api-egxh.onrender.com/docs",
+      },
+    });
+  });
+
+  /**
    * Routes API
    * ----------------------------------------------------------------
    * On monte chaque module sous /api/...
